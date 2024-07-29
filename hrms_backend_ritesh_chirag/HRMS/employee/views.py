@@ -37,37 +37,37 @@ class EmployeeProfile(viewsets.ModelViewSet):
     queryset =Employee.objects.all()
     serializer_class = EmployeeProfileSerializer
 
+
 class NotificationAll(APIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
-
-    def get(self, request, format=None):        
-        if request.user.is_superuser: 
+    def get(self, request, format=None):
+        if request.user.is_superuser:
             print("inside admin")
-            queryset = Notification.objects.filter(is_Read="False",request_admin=True).order_by('-status') 
-            serializer= NotificationSerializer(queryset,many=True)              
-            return Response(serializer.data)
+            queryset = Notification.objects.filter(is_Read=False, request_admin=True).order_by('-status')
         else:
             print("inside user")
-            queryset = Notification.objects.filter(employee_id=self.request.user.id,is_Read=False,request_admin=False).order_by('-status')
-            serializer= NotificationSerializer(queryset,many=True)            
-            return Response(serializer.data)
+            queryset = Notification.objects.filter(employee_id=request.user.id, is_Read=False, request_admin=False).order_by('-status')
 
-    def patch(self, request):
-        print("i am inside")
-        if self.request.user.is_staff:
-             Notification.objects.filter(is_Read="False").update(is_Read=True)
+        serializer = NotificationSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def patch(self, request, format=None):
+        print("i am inside patch")
+        if request.user.is_staff:
+            Notification.objects.filter(is_Read=False).update(is_Read=True)
         else:
-            Notification.objects.filter(employee_id=self.request.user.id,is_Read="False").update(is_Read=True)
+            Notification.objects.filter(employee_id=request.user.id, is_Read=False).update(is_Read=True)
 
-        return Response({"message : Notification Updated Successfuly"})
-    
-    def post(self, request,format=None):
-        print("i am inside post")   
-        employee_id = request.query_params.get('id', None) 
-        serializer =  NotificationSerializer(data=request.data)
+        return Response({"message": "Notifications updated successfully"}, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        print("i am inside post")
+        employee_id = request.query_params.get('id', None)
+        serializer = NotificationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(employee_id_id = employee_id)      
+            serializer.save(employee_id_id=employee_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

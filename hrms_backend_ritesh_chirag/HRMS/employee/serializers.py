@@ -45,26 +45,29 @@ class UserSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     total_notification = serializers.SerializerMethodField()
-    employee_id=UserSerializer(read_only=True)
+    employee_id = UserSerializer(read_only=True)
 
     class Meta:
         model = Notification
-        fields = ['id','status','message','is_Read','request_admin','total_notification','employee_id']
-    def get_total_notification(self,obj):
-        print("my id is ",obj.employee_id.is_staff)
-        checkUser = Employee.objects.get(id=obj.employee_id.id)
-        print("<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",checkUser.is_superuser)
-        if checkUser.is_superuser:
-            print("I am superUser")
-            notificationCount = Notification.objects.filter(is_Read=False,request_admin=True).count()
-            print("note",notificationCount)
-        else:
-            print("I am user")
-            notificationCount = Notification.objects.filter(is_Read=False,request_admin=False).count()
-        return notificationCount
-    def get_employee(self,obj):
+        fields = ['id', 'status', 'message', 'is_Read', 'request_admin', 'total_notification', 'employee_id']
+
+    def get_total_notification(self, obj):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            if request.user.is_superuser:
+                print("I am superUser")
+                notificationCount = Notification.objects.filter(is_Read=False, request_admin=True).count()
+                print("note", notificationCount)
+            else:
+                print("I am user")
+                notificationCount = Notification.objects.filter(is_Read=False, request_admin=False).count()
+            return notificationCount
+        return 0 
+
+    def get_employee(self, obj):
         employee = Employee.objects.all()
         return employee
+
     
     
 
