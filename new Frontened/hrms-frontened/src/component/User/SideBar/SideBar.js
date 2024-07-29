@@ -97,12 +97,12 @@ const Sidebar = () => {
         <Modal.Header closeButton>
           <Modal.Title>Notifications</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-           {notificationData.length>0 && (notificationData.map((notification)=>(
+        <Modal.Body  className="modal-body">
+           {notificationData.length>0 ? (notificationData.map((notification)=>(
             <div id={notification.id}>
                <pre>{notification.employee_id.first_name} {notification.message} {formatDate(notification.status)}</pre>
             </div>
-           )))}
+           ))) : <h2>Notification Not Found</h2>}
           </Modal.Body>
           <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowUpdateModal(false)}>

@@ -72,3 +72,9 @@
   .dropdown:hover .dropdown-content {
     display: block;
   }
+
+
+  .modal-body {
+    max-height: 400px;
+    overflow-y: auto;
+  }
